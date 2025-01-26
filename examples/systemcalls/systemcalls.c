@@ -1,5 +1,11 @@
 #include "systemcalls.h"
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdio.h>
+#include <fcntl.h>
+
 /**
  * @param cmd the command to execute with system()
  * @return true if the command in @param cmd was executed
@@ -16,8 +22,11 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
-
-    return true;
+    if (system(cmd) == 0) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /**
@@ -58,10 +67,27 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
-
+    pid_t child_pid = fork();
+    if (child_pid == -1) {
+        return false;
+    } else if (child_pid == 0) {
+        // child
+        execv(command[0], command); // overrides child, nothing past this line is executed on the child.
+        exit(-1); // never reached
+    }
+    // parent
     va_end(args);
-
-    return true;
+    int status;
+    if (waitpid(child_pid, &status, 0) == -1) {
+        return false;
+    } else if (WIFEXITED(status)) {
+        if (WEXITSTATUS(status) != 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -92,8 +118,41 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+    int out_redirect = open(outputfile, O_RDWR|O_TRUNC|O_CREAT, 0644);
+    if (out_redirect < 0) {
+        perror("open");
+        va_end(args);
+        return false;
+    }
 
+    int child_pid = fork();
+
+    if (child_pid == -1) {
+        perror("fork");
+        va_end(args);
+        return false;
+    } else if (child_pid == 0) {
+        // child
+        // "1" in the "dup2" call below refers to stdout
+        if (dup2(out_redirect, 1) < 0) {
+            perror("dup2");
+            return false;
+        }
+        close(out_redirect);
+        execvp(command[0], command);
+    }
+    // parent
+    close(out_redirect);
     va_end(args);
-
-    return true;
+    int status;
+    if (waitpid(child_pid, &status, 0) == -1) {
+        return false;
+    } else if (WIFEXITED(status)) {
+        if (WEXITSTATUS(status) != 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    return false;
 }
