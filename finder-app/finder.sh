@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 print_usage() {
     echo "usage: finder.sh {search_dir} {search_str}"
