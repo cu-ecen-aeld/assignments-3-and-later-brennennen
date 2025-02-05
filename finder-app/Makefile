@@ -1,4 +1,4 @@
-# 
+#
 # Example commands:
 # make
 # CROSS_COMPILE=aarch64-none-linux-gnu- make
@@ -16,7 +16,9 @@ endif
 writer.o:
 	${CC} -c writer.c
 
-.PHONY: clean
+.PHONY: all clean
+
+all: writer
 
 clean:
 	rm -f writer.o writer
