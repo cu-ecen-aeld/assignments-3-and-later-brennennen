@@ -16,7 +16,7 @@ endif
 
 
 aesdsocket.o:
-	${CC} -c aesdsocket.c -Wall
+	${CC} -c aesdsocket.c -I. -Wall -g
 
 .PHONY: all clean
 
