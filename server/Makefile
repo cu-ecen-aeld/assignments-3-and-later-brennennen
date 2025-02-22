@@ -5,7 +5,7 @@
 # make clean
 #
 
-# breaks yocto
+# setting CC breaks yocto
 # ifdef CROSS_COMPILE
 # CC := ${CROSS_COMPILE}gcc
 # else
@@ -14,10 +14,10 @@
 
 .DEFAULT_GOAL := aesdsocket
 
-
-
+# debug symbols break yocto
+#${CC} -c aesdsocket.c -I. -Wall -g
 aesdsocket.o:
-	${CC} -c aesdsocket.c -I. -Wall -g
+	${CC} -c aesdsocket.c -I. -Wall
 
 .PHONY: all clean
 
