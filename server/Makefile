@@ -5,11 +5,12 @@
 # make clean
 #
 
-ifdef CROSS_COMPILE
-CC := ${CROSS_COMPILE}gcc
-else
-CC := gcc
-endif
+# breaks yocto
+# ifdef CROSS_COMPILE
+# CC := ${CROSS_COMPILE}gcc
+# else
+# CC := gcc
+# endif
 
 .DEFAULT_GOAL := aesdsocket
 
